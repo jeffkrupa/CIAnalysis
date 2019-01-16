@@ -81,7 +81,7 @@ crossSections = {
 "ZZ_ext_2016":16.523,
 "ZZ_2016":16.523,
 
-"ttbar_lep_2016":87.31,
+
 "ttbar_lep50to500_2016":87.31,
 "ttbar_lep_500to800_2016":0.32611,
 "ttbar_lep_800to1200_2016":0.03265,
