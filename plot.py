@@ -77,10 +77,12 @@ def plotDataMC(args,plot):
 				processes.append(Process(getattr(Backgrounds,background),eventCounts,negWeights))
 	
 	signals = []
+        signals2016 = []
 	for signal in args.signals:
 		if args.use2016:
 			signals.append(Process(getattr(Signals2016,signal),eventCounts,negWeights))
 		elif args.useAll:
+			signals2016.append(Process(getattr(Signals2016,signal),eventCounts,negWeights))
 			signals.append(Process(getattr(Signals,signal),eventCounts,negWeights))
                 else:	
 			signals.append(Process(getattr(Signals,signal),eventCounts,negWeights))
@@ -298,6 +300,7 @@ def plotDataMC(args,plot):
 	
 	if len(args.signals) != 0:
 		signalhists = []
+		i = 0
 		for Signal in signals:
 			if plot.plot2D:
 				signalhist = Signal.loadHistogramProjected(plot,lumi)
@@ -318,14 +321,14 @@ def plotDataMC(args,plot):
 			else:
 				if args.useAll:
 					if not plot.muon:
-						signalhist = Signal.loadHistogram(plot,ElLumi2016,zScale2016["electrons"])
+						signalhist = signals2016[i].loadHistogram(plot,ElLumi2016,zScale2016["electrons"])
                                 		signalhist.Add(Signal.loadHistogram(plot,ElLumi2017,zScale["electrons"]))	
                                 		signalhist.Add(Signal.loadHistogram(plot,ElLumi2018,zScale2018["electrons"]))
 					else:
-						signalhist = Signal.loadHistogram(plot,MuLumi2016,zScale2016["muons"])
+						signalhist = signals2016[i].loadHistogram(plot,MuLumi2016,zScale2016["muons"])
                                 		signalhist.Add(Signal.loadHistogram(plot,MuLumi2017,zScale["muons"]))	
                                 		signalhist.Add(Signal.loadHistogram(plot,MuLumi2018,zScale2018["muons"]))
-
+					i = i+1
 				else:
 					signalhist = Signal.loadHistogram(plot,lumi,zScaleFac)
 				signalhist.SetLineWidth(2)
@@ -338,8 +341,10 @@ def plotDataMC(args,plot):
 					else:	
 						signalProcesses.append(Process(getattr(Backgrounds,background),eventCounts,negWeights))
 				if args.useAll:
-					signalStack = TheStack(signalProcesses,lumi,plot,zScaleFac)
-					signalStack = TheStack(signalProcesses,ElLumi2017,plot,zScale["electrons"],signalProcesses,ElLumi2016,zScale2016["electrons"],ElLumi2018,zScale2018["electrons"])
+					if not plot.muon:
+						signalStack = TheStack(signalProcesses,ElLumi2017,plot,zScale["electrons"],signalProcesses,ElLumi2016,zScale2016["electrons"],ElLumi2018,zScale2018["electrons"])
+					else:
+						signalStack = TheStack(signalProcesses,MuLumi2017,plot,zScale["muons"],signalProcesses,MuLumi2016,zScale2016["muons"],MuLumi2018,zScale2018["muons"])
 
 				else:
 					signalStack = TheStack(signalProcesses,lumi,plot,zScaleFac)
