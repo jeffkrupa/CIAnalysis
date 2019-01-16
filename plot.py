@@ -39,6 +39,10 @@ def plotDataMC(args,plot):
 		data = Process(Data2016, normalized=True)
 	elif args.use2018:
 		data = Process(Data2018, normalized=True)
+        elif args.useAll:
+		data = Process(Data, normalized=True)
+                data2016 = Process(Data2016, normalized=True)
+		data2018 = Process(Data2018, normalized=True)
 	else:	
 		data = Process(Data, normalized=True)
 	
@@ -76,9 +80,8 @@ def plotDataMC(args,plot):
 	for signal in args.signals:
 		if args.use2016:
 			signals.append(Process(getattr(Signals2016,signal),eventCounts,negWeights))
-		elif arge.useAll:
+		elif args.useAll:
 			signals.append(Process(getattr(Signals,signal),eventCounts,negWeights))
-			signals.append(Process(getattr(Signals2016,signal),eventCounts,negWeights))
                 else:	
 			signals.append(Process(getattr(Signals,signal),eventCounts,negWeights))
 		
@@ -231,15 +234,15 @@ def plotDataMC(args,plot):
 
 		if args.useAll:
                         if plot.muon:
-			 	datahist = data.loadHistogram(plot,MuLumi2016,zScale2016["muons"])
+			 	datahist = data2016.loadHistogram(plot,MuLumi2016,zScale2016["muons"])
                                 datahist.Add(data.loadHistogram(plot,MuLumi2017,zScale["muons"]))	
-                                datahist.Add(data.loadHistogram(plot,MuLumi2018,zScale2018["muons"]))
+                                datahist.Add(data2018.loadHistogram(plot,MuLumi2018,zScale2018["muons"]))
 		
 				stack = TheStack(processes,MuLumi2017,plot,zScale["muons"],processes2,MuLumi2016,zScale2016["muons"],MuLumi2018,zScale2018["muons"])
 			else:
-				datahist = data.loadHistogram(plot,ElLumi2016,zScale2016["electrons"])
+				datahist = data2016.loadHistogram(plot,ElLumi2016,zScale2016["electrons"])
                                 datahist.Add(data.loadHistogram(plot,ElLumi2017,zScale["electrons"]))	
-                                datahist.Add(data.loadHistogram(plot,ElLumi2018,zScale2018["electrons"]))
+                                datahist.Add(data2018.loadHistogram(plot,ElLumi2018,zScale2018["electrons"]))
 		
 				stack = TheStack(processes,ElLumi2017,plot,zScale["electrons"],processes2,ElLumi2016,zScale2016["electrons"],ElLumi2018,zScale2018["electrons"])
 
@@ -336,7 +339,7 @@ def plotDataMC(args,plot):
 						signalProcesses.append(Process(getattr(Backgrounds,background),eventCounts,negWeights))
 				if args.useAll:
 					signalStack = TheStack(signalProcesses,lumi,plot,zScaleFac)
-					signalStack = TheStack(signalProcesses,ElLumi2017,plot,zScale["electrons"],ElLumi2016,zScale2016["electrons"],ElLumi2018,zScale2018["electrons"])
+					signalStack = TheStack(signalProcesses,ElLumi2017,plot,zScale["electrons"],signalProcesses,ElLumi2016,zScale2016["electrons"],ElLumi2018,zScale2018["electrons"])
 
 				else:
 					signalStack = TheStack(signalProcesses,lumi,plot,zScaleFac)
