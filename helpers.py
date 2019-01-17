@@ -286,7 +286,7 @@ class Process:
 			histo.GetYaxis().SetTitle(plot.yaxis)	
 				
 		return histo
-	def loadHistogramProjected(self,plot,lumi,zScaleFac):
+	def loadHistogramProjected(self,plot,lumi):
 		histo = None
 		for index, sample in enumerate(self.samples):
 			if plot.muon:
@@ -295,7 +295,7 @@ class Process:
 				tempHist = loadHistoFromFileProjected(fileNamesEle[sample],plot.histName,plot.rebin,plot.projLow,plot.projHigh)
 				
 			if len(self.xsecs) > 0:
-				tempHist.Scale(lumi*self.xsecs[index]/self.nEvents[index]*(1-2*self.negWeightFraction[index])*zScaleFac)
+				tempHist.Scale(lumi*self.xsecs[index]/self.nEvents[index]*(1-2*self.negWeightFraction[index]))
 			if histo == None:
 				histo = tempHist.Clone()
 			else:	
@@ -311,33 +311,60 @@ class TheStack:
 	from ROOT import THStack
 	theStack = THStack()	
 	theHistogram = None	
-	def  __init__(self,processes,lumi,plot,zScaleFac):
+	def __init__(self,processes,lumi,plot,zScaleFac,processes2 = None,lumi2016 = None,zScaleFac2016 = None, lumi2018 = None,zScaleFac2018 = None):
 		self.theStack = THStack()
-			
-		for process in processes:
-			temphist = process.loadHistogram(plot,lumi,zScaleFac)
+		if processes2 is None:
+			for process in processes:
+				temphist = process.loadHistogram(plot,lumi,zScaleFac)
 
-			self.theStack.Add(temphist.Clone())
-			if self.theHistogram == None:
-				self.theHistogram = temphist.Clone()
-			else:	
-				self.theHistogram.Add(temphist.Clone())
+				self.theStack.Add(temphist.Clone())
+				if self.theHistogram == None:
+					self.theHistogram = temphist.Clone()
+				else:	
+					self.theHistogram.Add(temphist.Clone())
+		else:
+			i=0	
+			for process in processes:
+				temphist = process.loadHistogram(plot,lumi,zScaleFac)
+                        	temphist.Add(processes2[i].loadHistogram(plot,lumi2016,zScaleFac2016))
+                        	temphist.Add(process.loadHistogram(plot,lumi2018,zScaleFac2018))
+
+				self.theStack.Add(temphist.Clone())
+				if self.theHistogram == None:
+					self.theHistogram = temphist.Clone()
+				else:	
+					self.theHistogram.Add(temphist.Clone())
+				i = i+1
+
 				
 class TheStack2D:
 	from ROOT import THStack
 	theStack = THStack()	
 	theHistogram = None	
-	def  __init__(self,processes,lumi,plot,zScale):
+	def  __init__(self,processes,lumi,plot, processes2016 = None, lumi2016 = None, lumi2018 = None):
 		self.theStack = THStack()
-			
-		for process in processes:
-			temphist = process.loadHistogramProjected(plot,lumi,zScale)
+		if processes2016 is None:	
+			for process in processes:
+				temphist = process.loadHistogramProjected(plot,lumi)
 
-			self.theStack.Add(temphist.Clone())
-			if self.theHistogram == None:
-				self.theHistogram = temphist.Clone()
-			else:	
-				self.theHistogram.Add(temphist.Clone())
+				self.theStack.Add(temphist.Clone())
+				if self.theHistogram == None:
+					self.theHistogram = temphist.Clone()
+				else:	
+					self.theHistogram.Add(temphist.Clone())
+		else:	
+			i = 0
+			for process in processes:
+				temphist = process.loadHistogramProjected(plot,lumi)
+				temphist.Add(process.loadHistogramProjected(plot,lumi2018))
+				temphist.Add(processes2016[i].loadHistogramProjected(plot,lumi2016))
+
+				self.theStack.Add(temphist.Clone())
+				if self.theHistogram == None:
+					self.theHistogram = temphist.Clone()
+				else:	
+					self.theHistogram.Add(temphist.Clone())
+				i = i+1
 
 def getDataHist(plot,files,fromTree=False):
 	if not fromTree:
