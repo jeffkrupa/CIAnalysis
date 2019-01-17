@@ -1,7 +1,7 @@
 void limitPlotCI_Run2CI_singleBin2800_DesLL()
 {
 //=========Macro generated from canvas: cCL/cCL
-//=========  (Thu Jan 17 16:29:48 2019) by ROOT version6.06/09
+//=========  (Thu Jan 17 17:42:02 2019) by ROOT version6.06/09
    TCanvas *cCL = new TCanvas("cCL", "cCL",0,0,800,500);
    gStyle->SetOptStat(0);
    cCL->SetHighLightColor(2);
@@ -483,7 +483,7 @@ void limitPlotCI_Run2CI_singleBin2800_DesLL()
    entry->SetTextFont(42);
    leg->Draw();
    
-   pl = new TPaveLabel(0.4,0.905,0.9,0.99,"137.4 fb^{-1} (13 TeV, ee) + 140.1 fb^{-1} (13 TeV, #mu #mu)","NBNDC");
+   pl = new TPaveLabel(0.4,0.905,0.9,0.99,"137.4 fb^{-1} (13 TeV, ee) + 140.1 fb^{-1} (13 TeV, #mu#mu)","NBNDC");
    pl->SetBorderSize(0);
    pl->SetFillColor(0);
    pl->SetTextFont(42);
