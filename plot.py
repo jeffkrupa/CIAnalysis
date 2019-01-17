@@ -229,9 +229,24 @@ def plotDataMC(args,plot):
 			
 			
 	if plot.plot2D:	
-		datahist = data.loadHistogramProjected(plot,lumi,zScaleFac)	
+		if args.useAll:
+			if plot.muon:
+				datahist = data2016.loadHistogramProjected(plot,MuLumi2016)	
+				datahist.Add(data.loadHistogramProjected(plot,MuLumi2017))	
+				datahist.Add(data2018.loadHistogramProjected(plot,MuLumi2018))	
+
+				stack = TheStack2D(processes,MuLumi2017,plot,processes2,MuLumi2016,MuLumi2018)
+			else:
+				datahist = data2016.loadHistogramProjected(plot,ElLumi2016)	
+				datahist.Add(data.loadHistogramProjected(plot,ElLumi2017))	
+				datahist.Add(data2018.loadHistogramProjected(plot,ElLumi2018))	
 		
-		stack = TheStack2D(processes,lumi,plot,zScaleFac)
+				stack = TheStack2D(processes,MuLumi2017,plot,processes2,ElLumi2016,ElLumi2018)
+
+		else:
+			datahist = data.loadHistogramProjected(plot,lumi)	
+		
+			stack = TheStack2D(processes,lumi,plot)
 	else:
 
 		if args.useAll:
@@ -303,17 +318,45 @@ def plotDataMC(args,plot):
 		i = 0
 		for Signal in signals:
 			if plot.plot2D:
-				signalhist = Signal.loadHistogramProjected(plot,lumi)
+				if args.UseAll:
+					if not plot.muon:
+						signalhist = signals2016[i].loadHistogram(plot,ElLumi2016)
+                                		signalhist.Add(Signal.loadHistogram(plot,ElLumi2017,))	
+                                		signalhist.Add(Signal.loadHistogram(plot,ElLumi2018))
+					else:
+						signalhist = signals2016[i].loadHistogram(plot,MuLumi2016,zScale2016["muons"])
+                                		signalhist.Add(Signal.loadHistogram(plot,MuLumi2017))	
+                                		signalhist.Add(Signal.loadHistogram(plot,MuLumi2018))
+					i = i+1
+
+				else:
+					signalhist = Signal.loadHistogramProjected(plot,lumi)
 				signalhist.SetLineWidth(2)
 				signalBackgrounds = deepcopy(backgrounds)
 				signalBackgrounds.remove("DrellYan")
 				signalProcesses = []
+				signalProcesses2016 = []
 				for background in signalBackgrounds:
-					if background == "Jets":
+					if args.useAll:
+						if background == "Jets":
+							signalProcesses.append(Process(getattr(Backgrounds,background),eventCounts,negWeights,normalized=True))
+							signalProcesses2016.append(Process(getattr(Backgrounds2016,background),eventCounts,negWeights,normalized=True))
+						else:
+							signalProcesses.append(Process(getattr(Backgrounds,background),eventCounts,negWeights))
+							signalProcesses2016.append(Process(getattr(Backgrounds2016,background),eventCounts,negWeights))
+
+					elif background == "Jets":
 						signalProcesses.append(Process(getattr(Backgrounds,background),eventCounts,negWeights,normalized=True))
 					else:	
 						signalProcesses.append(Process(getattr(Backgrounds,background),eventCounts,negWeights))
-				signalStack = TheStack2D(signalProcesses,lumi,plot)
+				if args.useAll:
+					if not plot.muon:
+						signalStack = TheStack2D(signalProcesses,ElLumi2017,plot,signalProcesses2016,ElLumi2016,ElLumi2018)
+					else:
+						signalStack = TheStack2D(signalProcesses,MuLumi2017,plot,signalProcesses2016,MuLumi2016,MuLumi2018)
+
+				else:
+					signalStack = TheStack2D(signalProcesses,lumi,plot)
 				signalhist.Add(signalStack.theHistogram)
 				signalhist.SetMinimum(0.1)
 				signalhist.Draw("samehist")
@@ -335,16 +378,25 @@ def plotDataMC(args,plot):
 				signalBackgrounds = deepcopy(backgrounds)
 				signalBackgrounds.remove("DrellYan")
 				signalProcesses = []
+				signalProcesses2016 = []
 				for background in signalBackgrounds:
-					if background == "Jets":
+					if args.useAll:
+						if background == "Jets":
+							signalProcesses.append(Process(getattr(Backgrounds,background),eventCounts,negWeights,normalized=True))
+							signalProcesses2016.append(Process(getattr(Backgrounds2016,background),eventCounts,negWeights,normalized=True))
+						else:
+							signalProcesses.append(Process(getattr(Backgrounds,background),eventCounts,negWeights))
+							signalProcesses2016.append(Process(getattr(Backgrounds2016,background),eventCounts,negWeights))
+
+					elif background == "Jets":
 						signalProcesses.append(Process(getattr(Backgrounds,background),eventCounts,negWeights,normalized=True))
 					else:	
 						signalProcesses.append(Process(getattr(Backgrounds,background),eventCounts,negWeights))
 				if args.useAll:
 					if not plot.muon:
-						signalStack = TheStack(signalProcesses,ElLumi2017,plot,zScale["electrons"],signalProcesses,ElLumi2016,zScale2016["electrons"],ElLumi2018,zScale2018["electrons"])
+						signalStack = TheStack(signalProcesses,ElLumi2017,plot,zScale["electrons"],signalProcesses2016,ElLumi2016,zScale2016["electrons"],ElLumi2018,zScale2018["electrons"])
 					else:
-						signalStack = TheStack(signalProcesses,MuLumi2017,plot,zScale["muons"],signalProcesses,MuLumi2016,zScale2016["muons"],MuLumi2018,zScale2018["muons"])
+						signalStack = TheStack(signalProcesses,MuLumi2017,plot,zScale["muons"],signalProcesses2016,MuLumi2016,zScale2016["muons"],MuLumi2018,zScale2018["muons"])
 
 				else:
 					signalStack = TheStack(signalProcesses,lumi,plot,zScaleFac)

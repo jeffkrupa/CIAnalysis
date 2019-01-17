@@ -341,17 +341,30 @@ class TheStack2D:
 	from ROOT import THStack
 	theStack = THStack()	
 	theHistogram = None	
-	def  __init__(self,processes,lumi,plot):
+	def  __init__(self,processes,lumi,plot, processes2016 = None, lumi2016 = None, lumi2018 = None):
 		self.theStack = THStack()
-			
-		for process in processes:
-			temphist = process.loadHistogramProjected(plot,lumi)
+		if processes2016 is None:	
+			for process in processes:
+				temphist = process.loadHistogramProjected(plot,lumi)
 
-			self.theStack.Add(temphist.Clone())
-			if self.theHistogram == None:
-				self.theHistogram = temphist.Clone()
-			else:	
-				self.theHistogram.Add(temphist.Clone())
+				self.theStack.Add(temphist.Clone())
+				if self.theHistogram == None:
+					self.theHistogram = temphist.Clone()
+				else:	
+					self.theHistogram.Add(temphist.Clone())
+		else:	
+			i = 0
+			for process in processes:
+				temphist = process.loadHistogramProjected(plot,lumi)
+				temphist.Add(process.loadHistogramProjected(plot,lumi2018))
+				temphist.Add(processes2016[i].loadHistogramProjected(plot,lumi2016))
+
+				self.theStack.Add(temphist.Clone())
+				if self.theHistogram == None:
+					self.theHistogram = temphist.Clone()
+				else:	
+					self.theHistogram.Add(temphist.Clone())
+				i = i+1
 
 def getDataHist(plot,files,fromTree=False):
 	if not fromTree:
